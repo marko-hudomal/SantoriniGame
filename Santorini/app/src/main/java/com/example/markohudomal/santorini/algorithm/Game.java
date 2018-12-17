@@ -153,7 +153,7 @@ public class Game {
             if ((GameActivity.bot_view==1) && (GameActivity.bots[player_turn]))
             {
                 Log.d("SANTORINI_LOG","Bots now plays");
-                botPlayNextMove();
+                botPlayNextMove(GameActivity.difficulty);
             }
     }
     public boolean setFigure(Cell [][] matrix, int click_x,int click_y,int player)
@@ -328,7 +328,7 @@ public class Game {
 
         return new Point(x,y);
     }
-    public void botPlayNextMove()
+    public void botPlayNextMove(int difficulty)
     {
         int game_depth=GameActivity.game_depth;
 
@@ -342,7 +342,17 @@ public class Game {
                 break;
             }
             case Game.STATE_MOVE:{
-                MinMax.BoardState bs = MinMax.minmaxDecision(mCells,game_depth,player_turn);
+
+                //Choose difficulty
+                MinMax.BoardState bs;
+                switch(difficulty)
+                {
+                    case 1:bs = MinMax.minmaxAlphaBetaDecision(mCells,game_depth,player_turn);break;
+                    case 2:bs = MinMax.minmaxAlphaBetaDecision(mCells,game_depth,player_turn);break;
+                    default:bs= MinMax.minmaxDecision(mCells,game_depth,player_turn);break;
+                }
+
+
                 if (bs!=null) {
                     selectedCell=mCells[bs.pointFrom.x][bs.pointFrom.y];
                     move(mCells,bs.pointMove.x,bs.pointMove.y,player_turn);

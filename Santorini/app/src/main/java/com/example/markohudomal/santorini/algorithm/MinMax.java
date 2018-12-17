@@ -110,22 +110,114 @@ public class MinMax {
         return ret;
     }
 
-
-    public static BoardState minmaxDecision(Cell[][] current_board,int depth,int player)
+    public static BoardState minmaxAlphaBetaDecision(Cell[][] current_board,int depth,int player)
     {
+        boolean maxPlayer;
+        if (player==0) maxPlayer=true; else maxPlayer=false;
+
         BoardState boardState = new BoardState(current_board,new Point(0,0),new Point(0,0),new Point(0,0));
-        BoardState bestBoard = minmax(boardState,depth,true,player);
+        BoardState bestBoard = minmaxAlphaBeta(boardState,depth,Integer.MIN_VALUE,Integer.MAX_VALUE,maxPlayer,player);
 
         if (bestBoard==null)
         {
             Log.d("SANTORINI_LOG","BEST BOARD IS NULL, NO!");
         }else{
-            Log.d("SANTORINI_LOG","From: "+ bestBoard.pointFrom.x+","+bestBoard.pointFrom.y);
-            Log.d("SANTORINI_LOG","Move: "+ bestBoard.pointMove.x+","+bestBoard.pointMove.y);
-            Log.d("SANTORINI_LOG","Build: "+ bestBoard.pointBuild.x+","+bestBoard.pointBuild.y);
+            //Log.d("SANTORINI_LOG","a_From: "+ bestBoard.pointFrom.x+","+bestBoard.pointFrom.y);
+            //Log.d("SANTORINI_LOG","a_Move: "+ bestBoard.pointMove.x+","+bestBoard.pointMove.y);
+            //Log.d("SANTORINI_LOG","a_Build: "+ bestBoard.pointBuild.x+","+bestBoard.pointBuild.y);
         }
 
         return bestBoard;
+    }
+    public static BoardState minmaxDecision(Cell[][] current_board,int depth,int player)
+    {
+        boolean maxPlayer;
+        if (player==0) maxPlayer=true; else maxPlayer=false;
+
+        BoardState boardState = new BoardState(current_board,new Point(0,0),new Point(0,0),new Point(0,0));
+        BoardState bestBoard = minmax(boardState,depth,maxPlayer,player);
+
+        if (bestBoard==null)
+        {
+            Log.d("SANTORINI_LOG","BEST BOARD IS NULL, NO!");
+        }else{
+            //Log.d("SANTORINI_LOG","From: "+ bestBoard.pointFrom.x+","+bestBoard.pointFrom.y);
+            //Log.d("SANTORINI_LOG","Move: "+ bestBoard.pointMove.x+","+bestBoard.pointMove.y);
+            //Log.d("SANTORINI_LOG","Build: "+ bestBoard.pointBuild.x+","+bestBoard.pointBuild.y);
+        }
+
+        return bestBoard;
+    }
+
+    private static int max(int a,int b)
+    {
+        if (a>=b) return a; else return b;
+    }
+    private static int min(int a,int b)
+    {
+        if (a<=b) return a; else return b;
+    }
+
+
+    public static BoardState minmaxAlphaBeta(BoardState boardState,int depth,int a, int b, boolean maxPlayer,int player){
+        //End
+        if (depth<=0)
+        {
+            boardState.value=heuristicFunction(boardState,player);
+            return boardState;
+        }
+
+        //Get childer
+        ArrayList<BoardState> boards = posible_moves_from(boardState,player);
+        if (boards==null)
+        {
+            Log.d("SANTORINI_LOG","Posible moves in one moment null");
+            return null;
+        }
+
+        //MAX Player
+        if (maxPlayer){
+            int bestVal= Integer.MIN_VALUE;
+            BoardState bestBoard=null;
+
+            for(int i=0;i<boards.size();i++)
+            {
+                BoardState currBoard = minmaxAlphaBeta(boards.get(i),depth-1,a,b,false,1-player);
+                if (currBoard!=null)
+                {
+                    if (currBoard.value>bestVal)
+                    {
+                        bestVal=currBoard.value;
+                        bestBoard=boards.get(i);
+                    }
+                    a=max(a,bestVal);
+                    if (a>=b) break;
+                }
+
+            }
+            return bestBoard;
+        }else
+        {
+            //MIN Player
+            int bestVal= Integer.MAX_VALUE;
+            BoardState bestBoard=null;
+
+            for(int i=0;i<boards.size();i++)
+            {
+                BoardState currBoard = minmaxAlphaBeta(boards.get(i),depth-1,a,b,true,1-player);
+                if (currBoard!=null)
+                {
+                    if (currBoard.value<bestVal)
+                    {
+                        bestVal=currBoard.value;
+                        bestBoard=boards.get(i);
+                    }
+                    b=min(b,bestVal);
+                    if (a>=b) break;
+                }
+            }
+            return bestBoard;
+        }
     }
     public static BoardState minmax(BoardState boardState,int depth,boolean maxPlayer,int player){
 
@@ -201,7 +293,8 @@ public class MinMax {
                     figuresOther.add(new Point(i,j));
             }
         }
-
+        int t;
+        if (player==0) t=1; else  t=-1;
 
         int m=board[boardState.pointMove.x][boardState.pointMove.y].getHeight();
         int n=board[boardState.pointBuild.x][boardState.pointBuild.y].getHeight()-1;
@@ -210,17 +303,17 @@ public class MinMax {
         int ud2=Math.abs(figuresOther.get(0).x-boardState.pointBuild.x) + Math.abs(figuresOther.get(0).y-boardState.pointBuild.y);
         ud2+=Math.abs(figuresOther.get(1).x-boardState.pointBuild.x) + Math.abs(figuresOther.get(1).y-boardState.pointBuild.y);
 
-        int func = m+n*(ud1-ud2);
+        int func = t*(m+n*(ud2-ud1));
 
-        Log.d("SANTORINI_LOG","----------------------------------------------");
-        Log.d("SANTORINI_LOG",player+". heuristic func: "+func);
-        Log.d("SANTORINI_LOG","m: "+m+",n: "+n+",ud1: "+ud1+",ud2: "+ud2);
-        Log.d("SANTORINI_LOG","MY=> f1: "+figuresMy.get(0).x+","+figuresMy.get(0).y+"; f2: "+figuresMy.get(1).x+","+figuresMy.get(1).y);
-        Log.d("SANTORINI_LOG","HIS=> f1: "+figuresOther.get(0).x+","+figuresOther.get(0).y+"; f2: "+figuresOther.get(1).x+","+figuresOther.get(1).y);
+        //Log.d("SANTORINI_LOG","----------------------------------------------");
+        //Log.d("SANTORINI_LOG","["+t+"]. heuristic func: "+func);
+        //Log.d("SANTORINI_LOG","m: "+m+",n: "+n+",ud1: "+ud1+",ud2: "+ud2);
+        //Log.d("SANTORINI_LOG","MY=> f1: "+figuresMy.get(0).x+","+figuresMy.get(0).y+"; f2: "+figuresMy.get(1).x+","+figuresMy.get(1).y);
+        //Log.d("SANTORINI_LOG","HIS=> f1: "+figuresOther.get(0).x+","+figuresOther.get(0).y+"; f2: "+figuresOther.get(1).x+","+figuresOther.get(1).y);
 
-        Log.d("SANTORINI_LOG","POINT BUILD=> f1: "+boardState.pointBuild.x+","+boardState.pointBuild.y);
-        Log.d("SANTORINI_LOG","POINT MOVE=> f1: "+boardState.pointMove.x+","+boardState.pointMove.y);
-        Log.d("SANTORINI_LOG","POINT FROM=> f1: "+boardState.pointFrom.x+","+boardState.pointFrom.y);
+        //Log.d("SANTORINI_LOG","POINT BUILD=> f1: "+boardState.pointBuild.x+","+boardState.pointBuild.y);
+        //Log.d("SANTORINI_LOG","POINT MOVE=> f1: "+boardState.pointMove.x+","+boardState.pointMove.y);
+        //Log.d("SANTORINI_LOG","POINT FROM=> f1: "+boardState.pointFrom.x+","+boardState.pointFrom.y);
         return func;
     }
 }

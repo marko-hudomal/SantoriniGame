@@ -39,22 +39,65 @@
         >
 
     </Spinner>
-    <EditText
-        android:id="@+id/edittext_game_depth"
+    <LinearLayout
+        android:id="@+id/linear_depth_diff"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-
+        android:orientation="horizontal"
         android:layout_gravity="center"
-
-        android:hint="@string/game_depth_hint"
-        android:textColor="@color/white"
-        android:textSize="16dp"
-        android:textColorHint="@color/lightBlue"
-        android:inputType="number"
-        android:maxLength="1"
+        android:layout_margin="15dp"
         android:visibility="gone"
-        android:textAlignment="center"
-        />
+        >
+
+        <EditText
+            android:id="@+id/edittext_game_depth"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+
+            android:layout_gravity="center"
+
+            android:hint="@string/game_depth_hint"
+            android:inputType="number"
+            android:maxLength="1"
+            android:textAlignment="center"
+            android:textColor="@color/white"
+            android:textColorHint="@color/lightBlue"
+
+            android:textSize="14dp" />
+        <RadioGroup
+            android:id="@+id/radio_group"
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:orientation="horizontal">
+
+            <RadioButton
+                android:id="@+id/radio_bolid"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="true"
+
+                android:text="Bolid"
+                android:textColor="@color/white" />
+
+            <RadioButton
+                android:id="@+id/radio_stupid"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+
+                android:text="Stupid"
+                android:textColor="@color/white" />
+
+            <RadioButton
+                android:id="@+id/radio_ninja"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+
+                android:text="Ninja"
+                android:textColor="@color/white" />
+        </RadioGroup>
+    </LinearLayout>
 
 
     <Button

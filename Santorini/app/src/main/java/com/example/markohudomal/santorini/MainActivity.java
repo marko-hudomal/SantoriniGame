@@ -15,6 +15,8 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 
 import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.Toast;
@@ -35,6 +37,8 @@ public class MainActivity extends AppCompatActivity {
     private EditText edit_text;
     private Switch button_switch;
     private Button button_start;
+    private RadioGroup radioGroup;
+    private LinearLayout linear_diff;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -63,9 +67,12 @@ public class MainActivity extends AppCompatActivity {
         ArrayAdapter adapter2 = ArrayAdapter.createFromResource(this,R.array.bot_vs_bot_view,R.layout.spinner_item);
         spinner2.setAdapter(adapter2);
 
+        //LinearLayout
+        linear_diff=findViewById(R.id.linear_depth_diff);
         //Game depth(if bot is selected)
         edit_text=findViewById(R.id.edittext_game_depth);
-
+        //Radio group
+        radioGroup = findViewById(R.id.radio_group);
         //----------------------------------------------------------------------------------------------------------------------
         spinner1.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -75,17 +82,17 @@ public class MainActivity extends AppCompatActivity {
                 {
                     case GAME_MODE_HUMAN_HUMAN:{
                         spinner2.setVisibility(View.GONE);
-                        edit_text.setVisibility(View.GONE);
+                        linear_diff.setVisibility(View.GONE);
                         break;
                     }
                     case GAME_MODE_HUMAN_BOT:{
                         spinner2.setVisibility(View.GONE);
-                        edit_text.setVisibility(View.VISIBLE);
+                        linear_diff.setVisibility(View.VISIBLE);
                         break;
                     }
                     case GAME_MODE_BOT_BOT:{
                         spinner2.setVisibility(View.VISIBLE);
-                        edit_text.setVisibility(View.VISIBLE);
+                        linear_diff.setVisibility(View.VISIBLE);
                         break;
                     }
                 }
@@ -110,11 +117,26 @@ public class MainActivity extends AppCompatActivity {
         intent.putExtra("bot_view",spinner2.getSelectedItemPosition());
 
 
-        if ((intent.getIntExtra("game_mode",0)!=0)&&(intent.getIntExtra("depth",-1)==-1) || (intent.getIntExtra("depth",10)>=5)){
+        if ((intent.getIntExtra("game_mode",0)!=0)&&(intent.getIntExtra("depth",-1)==-1) || (intent.getIntExtra("depth",10)>=6)){
             Toast.makeText(this, "Depth not regular", Toast.LENGTH_SHORT).show();
             return;
         }
-
+        int diff;
+        switch (radioGroup.getCheckedRadioButtonId()){
+            case R.id.radio_bolid:{
+                diff=0; break;
+            }
+            case R.id.radio_stupid:{
+                diff=1; break;
+            }
+            case R.id.radio_ninja:{
+                diff=2; break;
+            }
+            default:{
+                diff=-1;break;
+            }
+        }
+        intent.putExtra("difficulty",diff);
 
 
         startActivityForResult(intent,START_GAME);

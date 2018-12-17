@@ -58,6 +58,7 @@ public class GameActivity extends AppCompatActivity {
     public boolean load_file;
     public static int game_depth;
     public static int bot_view;
+    public static int difficulty;
 
     public static boolean bots[]={false,false};
 
@@ -84,7 +85,8 @@ public class GameActivity extends AppCompatActivity {
         load_file=intent.getBooleanExtra("load_file",false);
         game_depth=intent.getIntExtra("depth",-1);
         bot_view=intent.getIntExtra("bot_view",-1);
-        Log.d("SANTORINI_LOG","game_mode:"+game_mode+", load_file:"+load_file+", game_depth:"+game_depth+", bot_view:"+bot_view);
+        difficulty=intent.getIntExtra("difficulty",0);
+        Log.d("SANTORINI_LOG","game_mode:"+game_mode+", load_file:"+load_file+", game_depth:"+game_depth+", bot_view:"+bot_view+", diff:"+difficulty);
 
 
         //Button
@@ -339,7 +341,7 @@ public class GameActivity extends AppCompatActivity {
 
          if (bots[myGame.player_turn])
          {
-             myGame.botPlayNextMove();
+             myGame.botPlayNextMove(difficulty);
          }else
          {
              Toast.makeText(this, "Not his turn", Toast.LENGTH_SHORT).show();

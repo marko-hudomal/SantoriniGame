@@ -122,7 +122,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MojHolder> {
         }
 
         public void setValues(Cell cell) {
-            //mCard.setBackgroundColor(cell.getColor());
+
             mCardInside.setBackgroundColor(cell.getColor());
             mHeight.setText(""+cell.getHeight());
             coordX = cell.getX();
