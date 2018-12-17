@@ -4,6 +4,7 @@ package com.example.markohudomal.santorini.algorithm;
 import android.util.Log;
 
 import com.example.markohudomal.santorini.GameActivity;
+import com.example.markohudomal.santorini.struct.Cell;
 
 import java.util.ArrayList;
 
@@ -122,7 +123,7 @@ public class MinMax {
 
 
         //End
-        if (depth==0)
+        if (depth<=0)
         {
             boardState.value=heuristicFunction(boardState,player);
             return boardState;
@@ -143,7 +144,7 @@ public class MinMax {
 
             for(int i=0;i<boards.size();i++)
             {
-                BoardState currBoard = minmax(boards.get(i),depth-1,false,player);
+                BoardState currBoard = minmax(boards.get(i),depth-1,false,1-player);
                 if (currBoard!=null && currBoard.value>bestVal)
                 {
                     bestVal=currBoard.value;
@@ -160,7 +161,7 @@ public class MinMax {
 
             for(int i=0;i<boards.size();i++)
             {
-                BoardState currBoard = minmax(boards.get(i),depth-1,true,player);
+                BoardState currBoard = minmax(boards.get(i),depth-1,true,1-player);
                 if (currBoard!=null && currBoard.value<bestVal)
                 {
                     bestVal=currBoard.value;
@@ -200,7 +201,7 @@ public class MinMax {
 
         int l = m+n*(ud1-ud2);
 
-        //Log.d("SANTORINI_LOG","heuristic func: "+l);
+        Log.d("SANTORINI_LOG",player+". heuristic func: "+l);
         return l;
     }
 }

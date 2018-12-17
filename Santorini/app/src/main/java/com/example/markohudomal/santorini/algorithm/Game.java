@@ -1,37 +1,161 @@
 package com.example.markohudomal.santorini.algorithm;
 
 import android.graphics.Color;
-import android.util.Log;
 
 import com.example.markohudomal.santorini.GameActivity;
+import com.example.markohudomal.santorini.struct.Cell;
 
 import java.io.PrintWriter;
 
 public class Game {
-    public int figures[]={0,0};
+
+    //GAME STATE
+    public final static int STATE_INIT=0;
+    public final static int STATE_MOVE=1;
+    public final static int STATE_BUILD=2;
+    public final static int STATE_END=3;
+
+    //Current game turn and state
+    public Cell[][] mCells;
+    public int player_turn=-1;
+    public int player_state=-1;
+    public int winner = -1;
+    //Current extras
+    private int figures[]={0,0};
     public Cell selectedCell=null;
     public boolean nextMove=false;
-    public int winner = -1;
-    public PrintWriter output;
 
-    public Game(PrintWriter output)
+    private GameActivity myActivity;
+    private PrintWriter output;
+
+
+
+
+    public Game(GameActivity myActivity,Cell[][] mCells, PrintWriter output)
     {
         this.output=output;
+        this.mCells=mCells;
+        this.myActivity=myActivity;
     }
-    public Cell[][] setFigure(Cell [][] matrix, int click_x,int click_y,int player)
+
+    public String playNextMove(int coordX,int coordY){
+        String ret_message=null;
+        switch(player_state){
+            case Game.STATE_INIT:{
+
+                boolean success = setFigure(mCells,coordX,coordY,player_turn);
+                if (success) {
+                    //:)
+                    myActivity.refreshBoard();//could not be next move
+                }else
+                {
+                    ret_message = "False init!";
+                }
+                break;
+            }
+            case Game.STATE_MOVE:{
+                boolean success = move(mCells,coordX,coordY,player_turn);
+                if (success) {
+                    //:)
+                }else
+                {
+                    ret_message="False move!";
+                }
+
+                if (winner!=-1)
+                {
+                    player_state=Game.STATE_END;
+                }
+                break;
+            }
+            case Game.STATE_BUILD:{
+                boolean success = build(mCells,coordX,coordY,player_turn);
+                if (success) {
+                    //:)
+                }else
+                {
+                    ret_message="False build!";
+                }
+                if (winner!=-1)
+                {
+                    player_state=Game.STATE_END;
+                }
+                break;
+            }
+            case Game.STATE_END:{
+                ret_message="Game is over.";
+                return ret_message;
+            }
+            default:{
+                ret_message="Error";
+            }
+        }
+
+        nextState();
+        return ret_message;
+    }
+    public void nextState()
+    {
+            if (nextMove)
+            {
+                nextMove=false;
+                switch (player_state)
+                {
+                    case Game.STATE_INIT:{
+                        if (player_turn==1)
+                        {
+                            player_state=Game.STATE_MOVE;
+                        }
+                        player_turn=(1-player_turn);
+                        break;
+                    }
+                    case Game.STATE_MOVE:{
+                        player_state=Game.STATE_BUILD;
+                        break;
+                    }
+                    case Game.STATE_BUILD:{
+                        player_turn=(1-player_turn);
+                        player_state=Game.STATE_MOVE;
+                        myActivity.refreshBoard();
+
+                        break;
+                    }
+                    case Game.STATE_END:{
+                        //mAdapter.refreshBoard();
+                        player_turn=winner;
+                        myActivity.setTitleWon();
+                        break;
+                    }
+                    default:{
+                        //Toast.makeText(this, "Error!", Toast.LENGTH_SHORT).show();
+                        break;
+                    }
+
+                }
+
+                myActivity.nextMoveRefresh();
+
+            }else
+            {
+                //Toast.makeText(this, "can't proceed", Toast.LENGTH_SHORT).show();
+            }
+
+    }
+    public boolean setFigure(Cell [][] matrix, int click_x,int click_y,int player)
     {
         nextMove=false;
+
         //uncheck
         if (matrix[click_x][click_y].getPlayer()==player)
         {
             //Izbacen undo
-//            figures[player]--;
-//            matrix[click_x][click_y].setPlayer(-1);
-//            return matrix;
-              return null;
+            //figures[player]--;
+            //matrix[click_x][click_y].setPlayer(-1);
+            //return matrix;
+            return false;
         }
         //two already checked
-        if (figures[player]==2) return null;
+        if (figures[player]==2) return false;
 
         //check
         figures[player]++;
@@ -47,9 +171,9 @@ public class Game {
             //------------------------------------------------
             nextMove=true;
         }
-        return matrix;
+        return true;
     }
-    public Cell[][] move(Cell [][] matrix,int click_x,int click_y,int player)
+    public boolean move(Cell [][] matrix,int click_x,int click_y,int player)
     {
         nextMove=false;
         if (selectedCell!=null)
@@ -77,14 +201,14 @@ public class Game {
                 {
                     winner=player;
                 }
-                return matrix;
+                return true;
             }
 
             //Log.d("SANTORINI",""+not_on_player+","+not_4+","+next_to_last_position+","+correct_step+","+not_me);
         }
-        return null;
+        return false;
     }
-    public Cell[][] build(Cell [][] matrix,int click_x,int click_y,int player)
+    public boolean build(Cell [][] matrix,int click_x,int click_y,int player)
     {
         nextMove=false;
         if (selectedCell!=null)
@@ -106,14 +230,13 @@ public class Game {
                 {
                     winner=player;
                 }
-                return matrix;
+                return true;
             }
 
             //Log.d("SANTORINI",""+not_on_player+","+not_4+","+next_to_last_position+","+not_me);
         }
 
-
-        return null;
+        return false;
     }
     public static boolean canMove(Cell[][] matrix,int player)
     {

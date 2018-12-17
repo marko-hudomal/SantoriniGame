@@ -13,17 +13,20 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.markohudomal.santorini.algorithm.Cell;
+import com.example.markohudomal.santorini.struct.Cell;
+import com.example.markohudomal.santorini.algorithm.Game;
 
 public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MojHolder> {
 
     private Cell[][] mCells;
+    private Game myGame;
 
     private GameActivity mContext;
 
-    public MyAdapter(GameActivity mContext, Cell[][] mCells) {
+    public MyAdapter(GameActivity mContext, Cell[][] mCells, Game myGame) {
         this.mContext = mContext;
         this.mCells = mCells;
+        this.myGame=myGame;
     }
 
     @NonNull
@@ -61,87 +64,36 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MojHolder> {
         public MojHolder(@NonNull View itemView) {
             super(itemView);
 
-            //CLICK
+            //CLICK LISTENERS
             //----------------------------------------------------------------------------------------------------------------
             itemView.setOnClickListener(new View.OnClickListener(){
                 @Override
                 public void onClick(View v) {
-                    v.startAnimation(AnimationUtils.loadAnimation(mContext, R.anim.my_anim1));
                     //Toast.makeText(mContext, "cell:"+coordX+":"+coordY, Toast.LENGTH_SHORT).show();
+                    //TRY NEXT MOVE
+                    String ret_message = myGame.playNextMove(coordX,coordY);
+                    if (ret_message!=null)
+                        Toast.makeText(mContext, ret_message, Toast.LENGTH_SHORT).show();
 
-
-                    switch(GameActivity.player_state){
-                        case GameActivity.STATE_INIT:{
-
-                            Cell[][] ret=mContext.myGame.setFigure(mCells,coordX,coordY,GameActivity.player_turn);
-                            if (ret!=null) {
-                                mCells=ret;
-                            }else
-                            {
-                                Toast.makeText(mContext, "False init!", Toast.LENGTH_SHORT).show();
-                            }
-                            refreshBoard();
-
-                            break;
-                        }
-                        case GameActivity.STATE_MOVE:{
-                            Cell[][] ret = mContext.myGame.move(mCells,coordX,coordY,GameActivity.player_turn);
-                                if (ret!=null) {
-                                    mCells=ret;
-                                }else
-                                {
-                                    Toast.makeText(mContext, "False move!", Toast.LENGTH_SHORT).show();
-                                }
-
-                            if (mContext.myGame.winner!=-1)
-                            {
-                                GameActivity.player_state=GameActivity.STATE_END;
-                            }
-                            break;
-                        }
-                        case GameActivity.STATE_BUILD:{
-                            Cell[][] ret = mContext.myGame.build(mCells,coordX,coordY,GameActivity.player_turn);
-                                if (ret!=null) {
-                                    mCells=ret;
-                                }else
-                                {
-                                    Toast.makeText(mContext, "False build!", Toast.LENGTH_SHORT).show();
-                                }
-                            if (mContext.myGame.winner!=-1)
-                            {
-                                GameActivity.player_state=GameActivity.STATE_END;
-                            }
-                            break;
-                        }
-                        case GameActivity.STATE_END:{
-                                Toast.makeText(mContext, "Game is over", Toast.LENGTH_SHORT).show();
-
-                            break;
-                        }
-                        default:{
-                            Toast.makeText(mContext, "Error!", Toast.LENGTH_SHORT).show();
-                            return;
-                        }
-                    }
-                    mContext.nextMove();
+                    v.startAnimation(AnimationUtils.loadAnimation(mContext, R.anim.my_anim1));
                }
                });
             //----------------------------------------------------------------------------------------------------------------
             itemView.setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
                 public boolean onLongClick(View v) {
-                    v.startAnimation(AnimationUtils.loadAnimation(mContext, R.anim.my_anim2));
-                    if (GameActivity.player_state!=GameActivity.STATE_MOVE) return true;
-
-                    if (mCells[coordX][coordY].getPlayer()!=GameActivity.player_turn)
+                    //Toast.makeText(mContext, "Selected ["+coordX+":"+coordY+"]", Toast.LENGTH_SHORT).show();
+                    if (myGame.player_state!=Game.STATE_MOVE) return true;
+                    if (mCells[coordX][coordY].getPlayer()!=myGame.player_turn)
                     {
                         Toast.makeText(mContext, "No figure on that position!", Toast.LENGTH_SHORT).show();
+                        v.startAnimation(AnimationUtils.loadAnimation(mContext, R.anim.my_anim2));
                         return true;
                     }
                     mContext.myGame.selectedCell=mCells[coordX][coordY];
-                    mContext.myGame.selectedCell.setColor(GameActivity.COLOR_SELECTED);
-                    //Toast.makeText(mContext, "Selected ["+coordX+":"+coordY+"]", Toast.LENGTH_SHORT).show();
                     refreshBoard();
+
+                    v.startAnimation(AnimationUtils.loadAnimation(mContext, R.anim.my_anim2));
                     return true;
                 }
             });
@@ -181,8 +133,13 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MojHolder> {
                         break;
                     }
                 }
-                if (mCells[i][j]==mContext.myGame.selectedCell){
+                if (mCells[i][j]==mContext.myGame.selectedCell)
+                {
                     mCells[i][j].setColor(GameActivity.COLOR_SELECTED);
+                }
+                if (mCells[i][j].getHeight()==4)
+                {
+                    mCells[i][j].setColor(GameActivity.COLOR_BUILD_TOP);
                 }
             }
         }

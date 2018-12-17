@@ -1,4 +1,4 @@
-package com.example.markohudomal.santorini.algorithm;
+package com.example.markohudomal.santorini.struct;
 
 import android.graphics.Color;
 
