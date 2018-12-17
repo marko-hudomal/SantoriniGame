@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">Santorini</string>
+    <string name="load_from_file_switch"> Load from file</string>
+    <string name="game_depth_hint">Game depth</string>
+
+    <string-array name="game_mode">
+        <item>Human vs Human</item>
+        <item>Human vs Bot</item>
+        <item>Bot vs Bot</item>
+    </string-array>
+    <string-array name="bot_vs_bot_view">
+        <item>Step by Step</item>
+        <item>Execute to end</item>
+    </string-array>
+</resources>

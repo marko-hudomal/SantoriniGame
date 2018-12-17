@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/background2"
+    android:orientation="vertical"
+    tools:context=".MainActivity">
+
+    <Spinner
+        android:id="@+id/spinner1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+
+        android:layout_marginTop="95dp"
+        android:layout_marginLeft="25dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginBottom="20dp"
+
+        android:backgroundTint="@color/white"
+        >
+
+    </Spinner>
+
+    <Spinner
+        android:id="@+id/spinner2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+
+        android:layout_marginTop="10dp"
+        android:layout_marginLeft="25dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginBottom="20dp"
+
+        android:visibility="gone"
+
+        android:backgroundTint="@color/white"
+        >
+
+    </Spinner>
+    <EditText
+        android:id="@+id/edittext_game_depth"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+
+        android:layout_gravity="center"
+
+        android:hint="@string/game_depth_hint"
+        android:textColor="@color/white"
+        android:textSize="16dp"
+        android:textColorHint="@color/lightBlue"
+        android:inputType="number"
+        android:maxLength="1"
+        android:visibility="gone"
+        android:textAlignment="center"
+        />
+
+
+    <Button
+        android:id="@+id/button_start"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:text="start"
+        android:onClick="onStartClick"
+    />
+    <Switch
+        android:id="@+id/switch_load_game_state"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+
+        android:layout_gravity="center"
+
+        android:layout_marginBottom="8dp"
+        android:text="@string/load_from_file_switch"
+        android:padding="5pt"
+        android:textColor="@color/lightBlue"
+        />
+</LinearLayout>
