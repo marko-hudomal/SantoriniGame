@@ -24,7 +24,6 @@
         <activity
             android:name=".GameActivity"
             android:parentActivityName=".MainActivity" />
-        <activity android:name=".BotActivity"></activity>
     </application>
 
 </manifest>

@@ -3,6 +3,7 @@ package com.example.markohudomal.santorini;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Color;
+import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
@@ -10,12 +11,15 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.view.animation.AnimationUtils;
+import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.markohudomal.santorini.algorithm.MinMax;
 import com.example.markohudomal.santorini.struct.Cell;
 import com.example.markohudomal.santorini.algorithm.Game;
-import com.example.markohudomal.santorini.algorithm.MinMax;
+
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -42,6 +46,9 @@ public class GameActivity extends AppCompatActivity {
     private MyAdapter mAdapter;
     private TextView textViewPlayer;
     private TextView textViewState;
+    private TextView textViewHint;
+    private Button buttonNext;
+    private ProgressBar progressBar;
 
     private static Cell[][] mCells = new Cell[BOARD_WIDTH][BOARD_WIDTH];
     public Game myGame;
@@ -49,10 +56,14 @@ public class GameActivity extends AppCompatActivity {
     //From intent
     public int game_mode;
     public boolean load_file;
-    public int game_depth;
-    public int bot_view;
+    public static int game_depth;
+    public static int bot_view;
+
+    public static boolean bots[]={false,false};
 
     public static PrintWriter output;
+
+
 
     //CREATE========================================================================================
     @Override
@@ -76,9 +87,14 @@ public class GameActivity extends AppCompatActivity {
         Log.d("SANTORINI_LOG","game_mode:"+game_mode+", load_file:"+load_file+", game_depth:"+game_depth+", bot_view:"+bot_view);
 
 
+        //Button
+        buttonNext = findViewById(R.id.button_next);
+        //ProgressBar
+        progressBar = findViewById(R.id.progress_bar);
         //TextViews
         textViewPlayer = findViewById(R.id.text_left);
         textViewState = findViewById(R.id.text_right);
+        textViewHint = findViewById(R.id.text2_right);
 
         //RecyclerView
         recyclerView=findViewById(R.id.my_recycler_view);
@@ -96,6 +112,31 @@ public class GameActivity extends AppCompatActivity {
         }else
         {
             Log.d("SANTORINI_LOG","no loading from file");
+        }
+
+        //Bot mode init
+        switch(game_mode)
+        {
+            case MainActivity.GAME_MODE_HUMAN_HUMAN:{ bots[0]=false;bots[1]=false; break;}
+            case MainActivity.GAME_MODE_HUMAN_BOT:{
+                bots[0]=false;bots[1]=true;
+                buttonNext.setVisibility(View.VISIBLE);
+                break; }
+            case MainActivity.GAME_MODE_BOT_BOT:{
+                bots[0]=true;bots[1]=true;
+
+                if (bot_view==0)
+                {
+                    buttonNext.setVisibility(View.VISIBLE);
+                    textViewHint.setText("Step by step");
+                    buttonNext.setText("next");
+                }else
+                {
+                    buttonNext.setVisibility(View.VISIBLE);
+                    textViewHint.setText("Execute to end (may take time)");
+                    buttonNext.setText("play");
+                }
+                break; }
         }
     }
     //==============================================================================================
@@ -254,37 +295,79 @@ public class GameActivity extends AppCompatActivity {
         textViewState.startAnimation(AnimationUtils.loadAnimation(this, android.R.anim.slide_out_right));
         setTitle();
         mAdapter.refreshBoard();
+        //Log.d("SANTORINI_LOG","board refreshed!");
     }
 
 
     @SuppressLint("SetTextI18n")
     public void onTipsClick(View view)
     {
-        if(game_mode!=MainActivity.GAME_MODE_HUMAN_BOT)
+        if(game_mode==MainActivity.GAME_MODE_HUMAN_HUMAN)
         {
-            ((TextView)view).setText("no");
+            if (myGame.lastBoard==null)
+            {
+                Toast.makeText(this, "turn not made", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            int func_val = MinMax.heuristicFunction(myGame.lastBoard,1-myGame.player_turn);
+            ((TextView)view).setText("function val: "+func_val);
             return;
         }else
         {
-            ((TextView)view).setText("calc...");
+            //((TextView)view).setText("...");
         }
-        MinMax.BoardState bs = MinMax.minmaxDecision(mCells,game_depth,myGame.player_turn);
-        if (bs!=null)
-        {
-//            for(int i=0;i<GameActivity.BOARD_WIDTH;i++)
-//            {
-//                    Log.d("SANTORINI_LOG",bs.board[i][0].player+" "+bs.board[i][1].getPlayer()+" "+bs.board[i][2].getPlayer()+" "+bs.board[i][3].getPlayer()+" "+bs.board[i][4].getPlayer());
-//            }
-            ((TextView)view).setText("From:"+ bs.pointFrom.x+","+bs.pointFrom.y +";Move: "+ bs.pointMove.x+","+bs.pointMove.y+";Build: "+ bs.pointBuild.x+","+bs.pointBuild.y);
-            Log.d("SANTORINI_LOG","From: "+ bs.pointFrom.x+","+bs.pointFrom.y);
-            Log.d("SANTORINI_LOG","Move: "+ bs.pointMove.x+","+bs.pointMove.y);
-            Log.d("SANTORINI_LOG","Build: "+ bs.pointBuild.x+","+bs.pointBuild.y);
-        }
+//        MinMax.BoardState bs = MinMax.minmaxDecision(mCells,game_depth,myGame.player_turn);
+//        if (bs!=null)
+//        {
+////            for(int i=0;i<GameActivity.BOARD_WIDTH;i++)
+////            {
+////                    Log.d("SANTORINI_LOG",bs.board[i][0].player+" "+bs.board[i][1].getPlayer()+" "+bs.board[i][2].getPlayer()+" "+bs.board[i][3].getPlayer()+" "+bs.board[i][4].getPlayer());
+////            }
+//            ((TextView)view).setText("From:"+ bs.pointFrom.x+","+bs.pointFrom.y +";Move: "+ bs.pointMove.x+","+bs.pointMove.y+";Build: "+ bs.pointBuild.x+","+bs.pointBuild.y);
+//            Log.d("SANTORINI_LOG","From: "+ bs.pointFrom.x+","+bs.pointFrom.y);
+//            Log.d("SANTORINI_LOG","Move: "+ bs.pointMove.x+","+bs.pointMove.y);
+//            Log.d("SANTORINI_LOG","Build: "+ bs.pointBuild.x+","+bs.pointBuild.y);
+//       }
     }
     public void onBackClick(View view)
     {
-        //Intent res = new Intent();
         setResult(RESULT_OK);
         finish();
+    }
+    public void onNextClick(View view)
+    {
+
+         if (bots[myGame.player_turn])
+         {
+             myGame.botPlayNextMove();
+         }else
+         {
+             Toast.makeText(this, "Not his turn", Toast.LENGTH_SHORT).show();
+         }
+    }
+
+
+    class ProgressTask extends AsyncTask<Void,Void,Void>
+
+    {
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            progressBar.setVisibility(View.VISIBLE);
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+        super.onPostExecute(aVoid);
+        progressBar.setVisibility(View.GONE);
+        Log.d("SANTORINI_LOG","Bot  play ended");
+        }
+
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+
+        return null;
+    }
     }
 }

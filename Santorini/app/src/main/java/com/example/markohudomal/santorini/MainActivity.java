@@ -109,8 +109,15 @@ public class MainActivity extends AppCompatActivity {
         intent.putExtra("depth",(edit_text.getText().toString().equals("")?-1:Integer.parseInt(edit_text.getText().toString())));
         intent.putExtra("bot_view",spinner2.getSelectedItemPosition());
 
-        startActivityForResult(intent,START_GAME);
 
+        if ((intent.getIntExtra("game_mode",0)!=0)&&(intent.getIntExtra("depth",-1)==-1) || (intent.getIntExtra("depth",10)>=5)){
+            Toast.makeText(this, "Depth not regular", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+
+
+        startActivityForResult(intent,START_GAME);
         //Toast.makeText(this, "game_mode: "+spinner1.getSelectedItemId(), Toast.LENGTH_SHORT).show();
         //Toast.makeText(this, "load_file: "+button_switch.isChecked(), Toast.LENGTH_SHORT).show();
         //Toast.makeText(this, "Depth: "+(edit_text.getText().toString()), Toast.LENGTH_SHORT).show();

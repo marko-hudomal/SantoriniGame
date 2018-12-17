@@ -1,8 +1,11 @@
 package com.example.markohudomal.santorini.algorithm;
 
 import android.graphics.Color;
+import android.os.AsyncTask;
+import android.util.Log;
 
 import com.example.markohudomal.santorini.GameActivity;
+import com.example.markohudomal.santorini.MainActivity;
 import com.example.markohudomal.santorini.struct.Cell;
 
 import java.io.PrintWriter;
@@ -29,7 +32,10 @@ public class Game {
     private PrintWriter output;
 
 
-
+    public MinMax.BoardState lastBoard=null;
+    public Point p_from=null;
+    public Point p_move=null;
+    public Point p_build=null;
 
     public Game(GameActivity myActivity,Cell[][] mCells, PrintWriter output)
     {
@@ -39,6 +45,7 @@ public class Game {
     }
 
     public String playNextMove(int coordX,int coordY){
+
         String ret_message=null;
         switch(player_state){
             case Game.STATE_INIT:{
@@ -98,6 +105,7 @@ public class Game {
     {
             if (nextMove)
             {
+                //Log.d("SANTORINI_LOG","nextState (nextMove=true)");
                 nextMove=false;
                 switch (player_state)
                 {
@@ -137,9 +145,16 @@ public class Game {
 
             }else
             {
+                //Log.d("SANTORINI_LOG","nextState (nextMove=false)");
                 //Toast.makeText(this, "can't proceed", Toast.LENGTH_SHORT).show();
             }
 
+            //Automatic Next move goes
+            if ((GameActivity.bot_view==1) && (GameActivity.bots[player_turn]))
+            {
+                Log.d("SANTORINI_LOG","Bots now plays");
+                botPlayNextMove();
+            }
     }
     public boolean setFigure(Cell [][] matrix, int click_x,int click_y,int player)
     {
@@ -188,6 +203,9 @@ public class Game {
                 printPosOutputFile(selectedCell.x,selectedCell.y);
                 printPosOutputFile(click_x,click_y);
                 //------------------------------------------------
+                p_from=new Point(selectedCell.x,selectedCell.y);//For BoardState
+                p_move=new Point(click_x,click_y);//For BoardState
+
                 selectedCell.setPlayer(-1);
                 selectedCell.setColor(Color.WHITE);
                 matrix[click_x][click_y].setPlayer(player);
@@ -221,6 +239,7 @@ public class Game {
                 //Print build-------------------------------------
                 printLinePosOutputFile(click_x,click_y);
                 //------------------------------------------------
+                p_build=new Point(click_x,click_y);//For BoardState
                 matrix[click_x][click_y].incHeight();
                 nextMove=true;
                 selectedCell=null;
@@ -230,6 +249,9 @@ public class Game {
                 {
                     winner=player;
                 }
+
+                lastBoard = new MinMax.BoardState(mCells,p_move,p_build,p_from);
+                MinMax.heuristicFunction(lastBoard,player_turn);
                 return true;
             }
 
@@ -292,4 +314,69 @@ public class Game {
         int x = Integer.parseInt(data.charAt(1)+"");
         return x-1;
     }
+
+    //Bot
+
+    public Point randCell() {
+        int x;
+        int y;
+        do{
+            int num = (int)(Math.random() * GameActivity.BOARD_WIDTH*GameActivity.BOARD_WIDTH);
+            x= num/GameActivity.BOARD_WIDTH;
+            y= num%GameActivity.BOARD_WIDTH;
+        }while(mCells[x][y].getPlayer()!=-1);
+
+        return new Point(x,y);
+    }
+    public void botPlayNextMove()
+    {
+        int game_depth=GameActivity.game_depth;
+
+        switch(player_state){
+            case Game.STATE_INIT:{
+                Point point = randCell();
+                boolean success = setFigure(mCells,point.x,point.y,player_turn);
+                if (success) {
+                    myActivity.refreshBoard();//not necessary next move
+                }
+                break;
+            }
+            case Game.STATE_MOVE:{
+                MinMax.BoardState bs = MinMax.minmaxDecision(mCells,game_depth,player_turn);
+                if (bs!=null) {
+                    selectedCell=mCells[bs.pointFrom.x][bs.pointFrom.y];
+                    move(mCells,bs.pointMove.x,bs.pointMove.y,player_turn);
+                    if (winner!=-1) {
+                        player_state=Game.STATE_END;
+                        Log.d("SANTORINI_LOG","Game ended with move!");
+                        break;
+                    }
+                    build(mCells,bs.pointBuild.x,bs.pointBuild.y,player_turn);
+                    if (winner!=-1) {
+                        player_state=Game.STATE_END;
+                        Log.d("SANTORINI_LOG","Game ended with build!");
+                        break;
+                    }
+                    player_state=Game.STATE_BUILD;//Build and move in one move
+                }
+                break;
+            }
+            case Game.STATE_BUILD:{
+                //No use
+                break;
+            }
+            case Game.STATE_END:{
+                return;
+            }
+            default:{
+
+            }
+        }
+
+        nextState();
+        return ;
+    }
+
+
+
 }

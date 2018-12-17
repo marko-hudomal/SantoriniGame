@@ -5,6 +5,7 @@ import android.graphics.Color;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,6 +16,8 @@ import android.widget.Toast;
 
 import com.example.markohudomal.santorini.struct.Cell;
 import com.example.markohudomal.santorini.algorithm.Game;
+
+import static com.example.markohudomal.santorini.GameActivity.*;
 
 public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MojHolder> {
 
@@ -70,8 +73,16 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MojHolder> {
                 @Override
                 public void onClick(View v) {
                     //Toast.makeText(mContext, "cell:"+coordX+":"+coordY, Toast.LENGTH_SHORT).show();
+                    if (bots[myGame.player_turn])
+                    {
+                        Toast.makeText(mContext, "bot is playing!", Toast.LENGTH_SHORT).show();
+                        Log.d("SANTORINI_LOG","short click: bot is playing!");
+                        return;
+                    }
+
                     //TRY NEXT MOVE
                     String ret_message = myGame.playNextMove(coordX,coordY);
+
                     if (ret_message!=null)
                         Toast.makeText(mContext, ret_message, Toast.LENGTH_SHORT).show();
 
@@ -83,6 +94,13 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MojHolder> {
                 @Override
                 public boolean onLongClick(View v) {
                     //Toast.makeText(mContext, "Selected ["+coordX+":"+coordY+"]", Toast.LENGTH_SHORT).show();
+                    if (bots[myGame.player_turn])
+                    {
+                        Toast.makeText(mContext, "bot is playing!", Toast.LENGTH_SHORT).show();
+                        Log.d("SANTORINI_LOG","long click: bot is playing!");
+                        return true;
+                    }
+
                     if (myGame.player_state!=Game.STATE_MOVE) return true;
                     if (mCells[coordX][coordY].getPlayer()!=myGame.player_turn)
                     {
@@ -114,6 +132,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MojHolder> {
 
     public void refreshBoard()
     {
+
         for(int i=0;i<GameActivity.BOARD_WIDTH;i++)
         {
             for(int j=0;j<GameActivity.BOARD_WIDTH;j++)
@@ -145,5 +164,6 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MojHolder> {
         }
 
         notifyDataSetChanged();
+
     }
 }
