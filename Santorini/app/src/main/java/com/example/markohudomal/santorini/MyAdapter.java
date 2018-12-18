@@ -21,6 +21,9 @@ import static com.example.markohudomal.santorini.GameActivity.*;
 
 public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MojHolder> {
 
+    public static int[][] pictures = {{R.drawable.t00,R.drawable.t01,R.drawable.t0},{R.drawable.t10,R.drawable.t11,R.drawable.t1},{R.drawable.t20,R.drawable.t21,R.drawable.t2},{R.drawable.t30,R.drawable.t31,R.drawable.t3},{R.drawable.t4,R.drawable.t4,R.drawable.t4}};
+
+
     private Cell[][] mCells;
     private Game myGame;
 
@@ -122,11 +125,20 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MojHolder> {
         }
 
         public void setValues(Cell cell) {
+                            int p;
+                if (cell.getPlayer()==-1) p=2;else p=cell.getPlayer();
+                mCard.setBackground(mContext.getResources().getDrawable(pictures[cell.getHeight()][p]));
+                if (cell.getColor()==GameActivity.COLOR_SELECTED)
+                {
+                    mCardInside.setBackgroundColor(GameActivity.COLOR_SELECTED);
+                    mCardInside.setAlpha((float)0.45);
+                }
+                //mCardInside.setBackgroundColor(cell.getColor());
+                //mHeight.setText(""+cell.getHeight());
+                coordX = cell.getX();
+                coordY = cell.getY();
 
-            mCardInside.setBackgroundColor(cell.getColor());
-            mHeight.setText(""+cell.getHeight());
-            coordX = cell.getX();
-            coordY = cell.getY();
+
         }
     }
 

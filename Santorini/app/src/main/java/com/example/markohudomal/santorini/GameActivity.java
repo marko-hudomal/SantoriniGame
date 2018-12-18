@@ -31,8 +31,8 @@ public class GameActivity extends AppCompatActivity {
 
     public final static int BOARD_WIDTH = 5;
 
-    public final static int COLOR_PLAYER_0 = (Color.parseColor("#52a8b8"));
-    public final static int COLOR_PLAYER_1 = (Color.parseColor("#bb4055"));
+    public final static int COLOR_PLAYER_0 = (Color.parseColor("#bb4055"));
+    public final static int COLOR_PLAYER_1 = (Color.parseColor("#52a8b8"));
     public final static int COLOR_SELECTED = Color.parseColor("#eee8aa");
     public final static int COLOR_BUILD_TOP = Color.parseColor("#150000");
     public final static int COLOR_WON = Color.parseColor("#FFD700");

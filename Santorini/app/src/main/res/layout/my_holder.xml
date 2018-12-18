@@ -7,7 +7,7 @@
     android:layout_marginBottom="16dp"
     android:layout_margin="10dp"
     android:layout_gravity="center"
-
+    android:background="@color/darkBlue"
     android:id="@+id/card_id">
 
     <LinearLayout
@@ -24,7 +24,7 @@
             android:layout_gravity="center"
             android:textAlignment="center"
             android:layout_margin="10dp"
-            android:text="4"
+            android:text=""
             android:textStyle="bold"
             android:textSize="16sp" />
 
