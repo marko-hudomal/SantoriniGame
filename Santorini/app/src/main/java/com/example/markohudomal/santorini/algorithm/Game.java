@@ -292,7 +292,21 @@ public class Game {
         }
         return false;
     }
-
+    public static int winnerWho(Cell[][] board)
+    {
+        int ret=-1;
+        for(int i = 0; i<GameActivity.BOARD_WIDTH; i++)
+        {
+            for(int j=0;j<GameActivity.BOARD_WIDTH;j++)
+            {
+                if  ((board[i][j].getHeight()==3) && (board[i][j].getPlayer()!=-1))
+                {
+                    return board[i][j].getPlayer();
+                }
+            }
+        }
+        return ret;
+    }
 
     public void printPosOutputFile(int i, int j)
     {
@@ -347,8 +361,9 @@ public class Game {
                 MinMax.BoardState bs;
                 switch(difficulty)
                 {
+                    case 0:bs = MinMax.minmaxDecision(mCells,game_depth,player_turn);break;
                     case 1:bs = MinMax.minmaxAlphaBetaDecision(mCells,game_depth,player_turn);break;
-                    case 2:bs = MinMax.minmaxAlphaBetaDecision(mCells,game_depth,player_turn);break;
+                    case 2:bs = MinMax.minmaxNinjaDecision(mCells,game_depth,player_turn);break;
                     default:bs= MinMax.minmaxDecision(mCells,game_depth,player_turn);break;
                 }
 

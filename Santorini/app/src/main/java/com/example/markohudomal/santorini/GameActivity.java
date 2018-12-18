@@ -311,7 +311,7 @@ public class GameActivity extends AppCompatActivity {
                 Toast.makeText(this, "turn not made", Toast.LENGTH_SHORT).show();
                 return;
             }
-            int func_val = MinMax.heuristicFunction(myGame.lastBoard,1-myGame.player_turn);
+            int func_val = MinMax.heuristicFunctionNinja(myGame.lastBoard,1-myGame.player_turn);
             ((TextView)view).setText("function val: "+func_val);
             return;
         }else

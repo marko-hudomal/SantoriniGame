@@ -17,6 +17,7 @@ public class MinMax {
         public Point pointMove;
         public Point pointBuild;
         public int value=-1;
+        public int winner=-1;
 
         public BoardState(Cell[][] board, Point movePoint, Point buildPoint, Point fromPoint) {
             this.board = board;
@@ -68,25 +69,41 @@ public class MinMax {
                     //Last move delete and set new position
                     move_board[fig_x][fig_y].setPlayer(-1);
                     move_board[i][j].setPlayer(player);//---------------------------------------------------------------------<<<<<PLAYER
+                    int potential_winner = Game.winnerWho(move_board);
+                    if (potential_winner!=-1)
+                    {
+                        BoardState bs_temp = new BoardState(move_board,new Point(i,j),new Point(0,0),new Point(fig_x,fig_y));
+                        bs_temp.winner=potential_winner;
+                        Log.d("SANTORINI_LOG","Found winner "+potential_winner);
+                        //Add to list!
+                        ret_array.add(bs_temp);
+                    }else
+                    {
+                        //Build around Figure X [n=9]
+                        for (int ii = i - 1; ii <= i + 1; ii++) {
+                            for (int jj = j - 1; jj <= j + 1; jj++) {
 
-                    //Build around Figure X [n=9]
-                    for (int ii = i - 1; ii <= i + 1; ii++) {
-                        for (int jj = j - 1; jj <= j + 1; jj++) {
+                                if ((ii >= GameActivity.BOARD_WIDTH) || (ii < 0)) continue;
+                                if ((jj >= GameActivity.BOARD_WIDTH) || (jj < 0)) continue;
+                                if (move_board[ii][jj].getPlayer() != -1) continue;
+                                if (move_board[ii][jj].getHeight() == 4) continue;
 
-                            if ((ii >= GameActivity.BOARD_WIDTH) || (ii < 0)) continue;
-                            if ((jj >= GameActivity.BOARD_WIDTH) || (jj < 0)) continue;
-                            if (move_board[ii][jj].getPlayer() != -1) continue;
-                            if (move_board[ii][jj].getHeight() == 4) continue;
+                                //Good build
+                                Cell[][] build_board = copyBoard(move_board);
+                                //Update field
+                                build_board[ii][jj].incHeight();
 
-                            //Good build
-                            Cell[][] build_board = copyBoard(move_board);
-                            //Update field
-                            build_board[ii][jj].incHeight();
-
-                            //Add to list!
-                            ret_array.add(new BoardState(build_board,new Point(i,j),new Point(ii,jj),new Point(fig_x,fig_y)));
+                                //Add to list!
+                                BoardState bs_temp=new BoardState(build_board,new Point(i,j),new Point(ii,jj),new Point(fig_x,fig_y));
+                                if (!Game.canMove(build_board,1-player)){
+                                    bs_temp.winner=player;
+                                    Log.d("SANTORINI_LOG","Found looser "+(1-player));
+                                }
+                                ret_array.add(bs_temp);
+                            }
                         }
                     }
+
 
                 }//for(j)
             }//for(i)
@@ -110,6 +127,105 @@ public class MinMax {
         return ret;
     }
 
+    //Ninja player===============================================================================================================================================
+    public static BoardState minmaxNinjaDecision(Cell[][] current_board,int depth,int player)
+    {
+        boolean maxPlayer;
+        if (player==0) maxPlayer=true; else maxPlayer=false;
+
+        BoardState boardState = new BoardState(current_board,new Point(0,0),new Point(0,0),new Point(0,0));
+        BoardState bestBoard = minmaxNinja(boardState,depth,Integer.MIN_VALUE,Integer.MAX_VALUE,maxPlayer,player);
+
+        if (bestBoard==null)
+        {
+            Log.d("SANTORINI_LOG","BEST BOARD IS NULL, NO!");
+        }else{
+            //Log.d("SANTORINI_LOG","a_From: "+ bestBoard.pointFrom.x+","+bestBoard.pointFrom.y);
+            //Log.d("SANTORINI_LOG","a_Move: "+ bestBoard.pointMove.x+","+bestBoard.pointMove.y);
+            //Log.d("SANTORINI_LOG","a_Build: "+ bestBoard.pointBuild.x+","+bestBoard.pointBuild.y);
+        }
+
+        return bestBoard;
+    }
+    public static BoardState minmaxNinja(BoardState boardState,int depth,int a, int b, boolean maxPlayer,int player){
+        //Log.d("SANTORINI_LOG","minmax");
+        //End
+        if ((depth<=0) || (boardState.winner!=-1))
+        {
+            if (boardState.winner!=-1)
+            {
+                Log.d("SANTORINI_LOG","Game winner "+boardState.winner+", on depth" + depth);
+            }
+            boardState.value=heuristicFunctionNinja(boardState,player);
+            return boardState;
+        }
+
+        //Get childer
+        ArrayList<BoardState> boards = posible_moves_from(boardState,player);
+        if (boards==null)
+        {
+            Log.d("SANTORINI_LOG","Posible moves in one moment null");
+            return null;
+        }
+
+        //MAX Player
+        if (maxPlayer){
+            int bestVal= Integer.MIN_VALUE;
+            BoardState bestBoard=null;
+
+            for(int i=0;i<boards.size();i++)
+            {
+                BoardState currBoard = minmaxNinja(boards.get(i),depth-1,a,b,false,1-player);
+                if (currBoard!=null)
+                {
+                    if (currBoard.value>bestVal)
+                    {
+                        bestVal=currBoard.value;
+                        bestBoard=boards.get(i);
+                        bestBoard.value=bestVal;
+                    }
+                    a=max(a,bestVal);
+                    if (a>=b) {
+                        //Log.d("SANTORINI_LOG","max cut");
+                    break;
+                    }
+                }
+
+            }
+            Log.d("SANTORINI_LOG","best board max: "+bestBoard.value);
+            return bestBoard;
+        }else
+        {
+            //MIN Player
+            int bestVal= Integer.MAX_VALUE;
+            BoardState bestBoard=null;
+
+            for(int i=0;i<boards.size();i++)
+            {
+                BoardState currBoard = minmaxNinja(boards.get(i),depth-1,a,b,true,1-player);
+                if (currBoard!=null)
+                {
+                    if (currBoard.value<bestVal)
+                    {
+                        bestVal=currBoard.value;
+                        bestBoard=boards.get(i);
+                        bestBoard.value=bestVal;
+                    }
+                    b=min(b,bestVal);
+                    if (a>=b) {
+                        //Log.d("SANTORINI_LOG","min cut");
+                        break;
+                    }
+                }
+            }
+            Log.d("SANTORINI_LOG","best board min: "+bestBoard.value);
+            return bestBoard;
+        }
+    }
+
+
+
+    //Stupid player=====================================================================================================================================================================================
     public static BoardState minmaxAlphaBetaDecision(Cell[][] current_board,int depth,int player)
     {
         boolean maxPlayer;
@@ -129,25 +245,6 @@ public class MinMax {
 
         return bestBoard;
     }
-    public static BoardState minmaxDecision(Cell[][] current_board,int depth,int player)
-    {
-        boolean maxPlayer;
-        if (player==0) maxPlayer=true; else maxPlayer=false;
-
-        BoardState boardState = new BoardState(current_board,new Point(0,0),new Point(0,0),new Point(0,0));
-        BoardState bestBoard = minmax(boardState,depth,maxPlayer,player);
-
-        if (bestBoard==null)
-        {
-            Log.d("SANTORINI_LOG","BEST BOARD IS NULL, NO!");
-        }else{
-            //Log.d("SANTORINI_LOG","From: "+ bestBoard.pointFrom.x+","+bestBoard.pointFrom.y);
-            //Log.d("SANTORINI_LOG","Move: "+ bestBoard.pointMove.x+","+bestBoard.pointMove.y);
-            //Log.d("SANTORINI_LOG","Build: "+ bestBoard.pointBuild.x+","+bestBoard.pointBuild.y);
-        }
-
-        return bestBoard;
-    }
 
     private static int max(int a,int b)
     {
@@ -161,7 +258,7 @@ public class MinMax {
 
     public static BoardState minmaxAlphaBeta(BoardState boardState,int depth,int a, int b, boolean maxPlayer,int player){
         //End
-        if (depth<=0)
+        if ((depth<=0) || (boardState.winner!=-1))
         {
             boardState.value=heuristicFunction(boardState,player);
             return boardState;
@@ -189,6 +286,7 @@ public class MinMax {
                     {
                         bestVal=currBoard.value;
                         bestBoard=boards.get(i);
+                        bestBoard.value=bestVal;
                     }
                     a=max(a,bestVal);
                     if (a>=b) break;
@@ -211,6 +309,7 @@ public class MinMax {
                     {
                         bestVal=currBoard.value;
                         bestBoard=boards.get(i);
+                        bestBoard.value=bestVal;
                     }
                     b=min(b,bestVal);
                     if (a>=b) break;
@@ -219,13 +318,38 @@ public class MinMax {
             return bestBoard;
         }
     }
+
+
+
+    //Bolid player========================================================================================================================================================
+    public static BoardState minmaxDecision(Cell[][] current_board,int depth,int player)
+    {
+        boolean maxPlayer;
+        if (player==0) maxPlayer=true; else maxPlayer=false;
+
+        BoardState boardState = new BoardState(current_board,new Point(0,0),new Point(0,0),new Point(0,0));
+        BoardState bestBoard = minmax(boardState,depth,maxPlayer,player);
+
+        if (bestBoard==null)
+        {
+            Log.d("SANTORINI_LOG","BEST BOARD IS NULL, NO!");
+        }else{
+            //Log.d("SANTORINI_LOG","From: "+ bestBoard.pointFrom.x+","+bestBoard.pointFrom.y);
+            //Log.d("SANTORINI_LOG","Move: "+ bestBoard.pointMove.x+","+bestBoard.pointMove.y);
+            //Log.d("SANTORINI_LOG","Build: "+ bestBoard.pointBuild.x+","+bestBoard.pointBuild.y);
+        }
+
+        return bestBoard;
+    }
+
     public static BoardState minmax(BoardState boardState,int depth,boolean maxPlayer,int player){
 
 
         //End
-        if (depth<=0)
+        if ((depth<=0) || (boardState.winner!=-1))
         {
             boardState.value=heuristicFunction(boardState,player);
+            //Log.d("SANTORINI_LOG","heuristics calc for player: "+player+";val="+boardState.value);
             return boardState;
         }
 
@@ -248,8 +372,9 @@ public class MinMax {
                 if (currBoard!=null && (currBoard.value>bestVal))
                 {
                     bestVal=currBoard.value;
-                    //Log.d("SANTORINI_LOG","bestVal_MAX: "+bestVal);
+                    Log.d("SANTORINI_LOG",depth+".bestVal_MAX: "+bestVal);
                     bestBoard=boards.get(i);
+                    bestBoard.value=bestVal;
                 }
 
             }
@@ -266,15 +391,16 @@ public class MinMax {
                 if (currBoard!=null && (currBoard.value<bestVal))
                 {
                     bestVal=currBoard.value;
-                    //Log.d("SANTORINI_LOG","bestVal_min: "+bestVal);
+                    Log.d("SANTORINI_LOG",depth+". bestVal_MIN: "+bestVal);
                     bestBoard=boards.get(i);
+                    bestBoard.value=bestVal;
                 }
 
             }
             return bestBoard;
         }
     }
-
+    //================================================================================================================================================
     public static int heuristicFunction(BoardState boardState,int player)
     {
         if (boardState==null) return 0;
@@ -303,7 +429,15 @@ public class MinMax {
         int ud2=Math.abs(figuresOther.get(0).x-boardState.pointBuild.x) + Math.abs(figuresOther.get(0).y-boardState.pointBuild.y);
         ud2+=Math.abs(figuresOther.get(1).x-boardState.pointBuild.x) + Math.abs(figuresOther.get(1).y-boardState.pointBuild.y);
 
-        int func = t*(m+n*(ud2-ud1));
+        if (boardState.winner==player)
+        {
+            return (t*100);
+        }
+        if (boardState.winner==1-player)
+        {
+            return t*(-100);
+        }
+        int func = t*(m+n*(ud1-ud2));
 
         //Log.d("SANTORINI_LOG","----------------------------------------------");
         //Log.d("SANTORINI_LOG","["+t+"]. heuristic func: "+func);
@@ -315,5 +449,78 @@ public class MinMax {
         //Log.d("SANTORINI_LOG","POINT MOVE=> f1: "+boardState.pointMove.x+","+boardState.pointMove.y);
         //Log.d("SANTORINI_LOG","POINT FROM=> f1: "+boardState.pointFrom.x+","+boardState.pointFrom.y);
         return func;
+    }
+    public static int heuristicFunctionNinja(BoardState boardState,int player)
+    {
+        if (boardState==null) return 0;
+
+        Cell[][] board = boardState.board;
+        ArrayList<Point> figuresMy = new ArrayList<>();
+        ArrayList<Point> figuresOther = new ArrayList<>();
+
+        for(int i = 0; i<GameActivity.BOARD_WIDTH;i++)
+        {
+            for(int j = 0; j<GameActivity.BOARD_WIDTH;j++)
+            {
+                if (board[i][j].getPlayer()==player){
+                    figuresMy.add(new Point(i,j));
+                }else if (board[i][j].getPlayer()==1-player)
+                    figuresOther.add(new Point(i,j));
+            }
+        }
+        int t;
+        if (player==0) t=1; else  t=-1;
+
+        int m=board[boardState.pointMove.x][boardState.pointMove.y].getHeight();
+        int n=board[boardState.pointBuild.x][boardState.pointBuild.y].getHeight()-1;
+        int ud1=Math.abs(figuresMy.get(0).x-boardState.pointBuild.x) + Math.abs(figuresMy.get(0).y-boardState.pointBuild.y);
+        int ud1_1=Math.abs(figuresMy.get(1).x-boardState.pointBuild.x) + Math.abs(figuresMy.get(1).y-boardState.pointBuild.y);
+        int ud2=Math.abs(figuresOther.get(0).x-boardState.pointBuild.x) + Math.abs(figuresOther.get(0).y-boardState.pointBuild.y);
+        int ud2_2=Math.abs(figuresOther.get(1).x-boardState.pointBuild.x) + Math.abs(figuresOther.get(1).y-boardState.pointBuild.y);
+
+        int y=0;
+        switch(m)
+        {
+            case 3: y=20;
+                    break;
+            case 2: y=15;
+                    break;
+            case 1: y=4;
+                    break;
+            case 0: y=2;
+                    break;
+        }
+
+
+        int x;
+        switch(n)
+        {
+            case 3: if (min(ud2,ud2_2)==1) x=10; else x=0;
+                    break;
+            case 2: if (min(ud2,ud2_2)==1) x=0; else x=10;
+                    break;
+            default: x=4;
+        }
+
+        if (boardState.winner==player)
+        {
+            return (t*100);
+        }
+        if (boardState.winner==1-player)
+        {
+            return t*(-100);
+        }
+        return t*(y+x);
+
+        //Log.d("SANTORINI_LOG","----------------------------------------------");
+        //Log.d("SANTORINI_LOG","["+t+"]. heuristic func: "+func);
+        //Log.d("SANTORINI_LOG","m: "+m+",n: "+n+",ud1: "+ud1+",ud2: "+ud2);
+        //Log.d("SANTORINI_LOG","MY=> f1: "+figuresMy.get(0).x+","+figuresMy.get(0).y+"; f2: "+figuresMy.get(1).x+","+figuresMy.get(1).y);
+        //Log.d("SANTORINI_LOG","HIS=> f1: "+figuresOther.get(0).x+","+figuresOther.get(0).y+"; f2: "+figuresOther.get(1).x+","+figuresOther.get(1).y);
+
+        //Log.d("SANTORINI_LOG","POINT BUILD=> f1: "+boardState.pointBuild.x+","+boardState.pointBuild.y);
+        //Log.d("SANTORINI_LOG","POINT MOVE=> f1: "+boardState.pointMove.x+","+boardState.pointMove.y);
+        //Log.d("SANTORINI_LOG","POINT FROM=> f1: "+boardState.pointFrom.x+","+boardState.pointFrom.y);
+
     }
 }
