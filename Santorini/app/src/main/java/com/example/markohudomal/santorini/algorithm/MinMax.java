@@ -126,10 +126,19 @@ public class MinMax {
 
         return ret;
     }
+    //Funkcije vracaju max i min respektivno za date argumente
+    private static int max(int a,int b)
+    {
+        if (a>=b) return a; else return b;
+    }
+    private static int min(int a,int b)
+    {
+        if (a<=b) return a; else return b;
+    }
 
     //Ninja player===============================================================================================================================================
-    public static BoardState minmaxNinjaDecision(Cell[][] current_board,int depth,int player)
-    {
+    //Wrapper funkcija za minmaxNinja(...)
+    public static BoardState minmaxNinjaDecision(Cell[][] current_board,int depth,int player) {
         boolean maxPlayer;
         if (player==0) maxPlayer=true; else maxPlayer=false;
 
@@ -143,12 +152,16 @@ public class MinMax {
             //Log.d("SANTORINI_LOG","a_From: "+ bestBoard.pointFrom.x+","+bestBoard.pointFrom.y);
             //Log.d("SANTORINI_LOG","a_Move: "+ bestBoard.pointMove.x+","+bestBoard.pointMove.y);
             //Log.d("SANTORINI_LOG","a_Build: "+ bestBoard.pointBuild.x+","+bestBoard.pointBuild.y);
+            Log.d("SANTORINI_LOG","[Ninja] Final minmax value: "+ bestBoard.value);
         }
 
         return bestBoard;
     }
+    //Rekurzivna funkcija odabiranja sledeceg poteza tezine 3
     public static BoardState minmaxNinja(BoardState boardState,int depth,int a, int b, boolean maxPlayer,int player){
-        //Log.d("SANTORINI_LOG","minmax");
+        //Modification
+        if (player==0) maxPlayer=true;else if (player==1) maxPlayer=false;
+
         //End
         if ((depth<=0) || (boardState.winner!=-1))
         {
@@ -157,6 +170,7 @@ public class MinMax {
                 Log.d("SANTORINI_LOG","Game winner "+boardState.winner+", on depth" + depth);
             }
             boardState.value=heuristicFunctionNinja(boardState,player);
+            Log.d("SANTORINI_LOG",depth+".bestVal_"+maxPlayer+": "+boardState.value);
             return boardState;
         }
 
@@ -192,7 +206,7 @@ public class MinMax {
                 }
 
             }
-            Log.d("SANTORINI_LOG","best board max: "+bestBoard.value);
+            Log.d("SANTORINI_LOG",depth+".bestVal_MAX: "+bestBoard.value);
             return bestBoard;
         }else
         {
@@ -218,16 +232,15 @@ public class MinMax {
                     }
                 }
             }
-            Log.d("SANTORINI_LOG","best board min: "+bestBoard.value);
+            Log.d("SANTORINI_LOG",depth+".bestVal_MIN: "+bestBoard.value);
             return bestBoard;
         }
     }
 
 
-
-    //Stupid player=====================================================================================================================================================================================
-    public static BoardState minmaxAlphaBetaDecision(Cell[][] current_board,int depth,int player)
-    {
+    //Stupid player===============================================================================================================================================
+    //Wrapper funkcija za minmaxAlphaBeta(...)
+    public static BoardState minmaxAlphaBetaDecision(Cell[][] current_board,int depth,int player) {
         boolean maxPlayer;
         if (player==0) maxPlayer=true; else maxPlayer=false;
 
@@ -241,22 +254,16 @@ public class MinMax {
             //Log.d("SANTORINI_LOG","a_From: "+ bestBoard.pointFrom.x+","+bestBoard.pointFrom.y);
             //Log.d("SANTORINI_LOG","a_Move: "+ bestBoard.pointMove.x+","+bestBoard.pointMove.y);
             //Log.d("SANTORINI_LOG","a_Build: "+ bestBoard.pointBuild.x+","+bestBoard.pointBuild.y);
+            Log.d("SANTORINI_LOG","[AlphaBeta] Final minmax value: "+ bestBoard.value);
         }
 
         return bestBoard;
     }
-
-    private static int max(int a,int b)
-    {
-        if (a>=b) return a; else return b;
-    }
-    private static int min(int a,int b)
-    {
-        if (a<=b) return a; else return b;
-    }
-
-
+    //Rekurzivna funkcija odabiranja sledeceg poteza tezine 2
     public static BoardState minmaxAlphaBeta(BoardState boardState,int depth,int a, int b, boolean maxPlayer,int player){
+        //Modification
+        if (player==0) maxPlayer=true;else if (player==1) maxPlayer=false;
+
         //End
         if ((depth<=0) || (boardState.winner!=-1))
         {
@@ -320,10 +327,9 @@ public class MinMax {
     }
 
 
-
-    //Bolid player========================================================================================================================================================
-    public static BoardState minmaxDecision(Cell[][] current_board,int depth,int player)
-    {
+    //Bolid player================================================================================================================================================
+    //Wrapper funkcija za minmax(...)
+    public static BoardState minmaxDecision(Cell[][] current_board,int depth,int player) {
         boolean maxPlayer;
         if (player==0) maxPlayer=true; else maxPlayer=false;
 
@@ -337,13 +343,15 @@ public class MinMax {
             //Log.d("SANTORINI_LOG","From: "+ bestBoard.pointFrom.x+","+bestBoard.pointFrom.y);
             //Log.d("SANTORINI_LOG","Move: "+ bestBoard.pointMove.x+","+bestBoard.pointMove.y);
             //Log.d("SANTORINI_LOG","Build: "+ bestBoard.pointBuild.x+","+bestBoard.pointBuild.y);
+            Log.d("SANTORINI_LOG","[MinMax] Final minmax value: "+ bestBoard.value);
         }
 
         return bestBoard;
     }
-
+    //Rekurzivna funkcija odabiranja sledeceg poteza tezine 1
     public static BoardState minmax(BoardState boardState,int depth,boolean maxPlayer,int player){
-
+        //Modification
+        if (player==0) maxPlayer=true;else if (player==1) maxPlayer=false;
 
         //End
         if ((depth<=0) || (boardState.winner!=-1))
@@ -372,12 +380,13 @@ public class MinMax {
                 if (currBoard!=null && (currBoard.value>bestVal))
                 {
                     bestVal=currBoard.value;
-                    Log.d("SANTORINI_LOG",depth+".bestVal_MAX: "+bestVal);
+                    //Log.d("SANTORINI_LOG",depth+".bestVal_MAX: "+bestVal);
                     bestBoard=boards.get(i);
                     bestBoard.value=bestVal;
                 }
 
             }
+            Log.d("SANTORINI_LOG",depth+".bestVal_MAX: "+bestBoard.value);
             return bestBoard;
         }else
         {
@@ -391,18 +400,19 @@ public class MinMax {
                 if (currBoard!=null && (currBoard.value<bestVal))
                 {
                     bestVal=currBoard.value;
-                    Log.d("SANTORINI_LOG",depth+". bestVal_MIN: "+bestVal);
+                    //Log.d("SANTORINI_LOG",depth+". bestVal_MIN: "+bestVal);
                     bestBoard=boards.get(i);
                     bestBoard.value=bestVal;
                 }
 
             }
+            Log.d("SANTORINI_LOG",depth+".bestVal_MIN: "+bestBoard.value);
             return bestBoard;
         }
     }
-    //================================================================================================================================================
-    public static int heuristicFunction(BoardState boardState,int player)
-    {
+    //============================================================================================================================================================
+    //Heuristicka funkcija za sledeci potez za tezine 1 i 2
+    public static int heuristicFunction(BoardState boardState,int player) {
         if (boardState==null) return 0;
 
         Cell[][] board = boardState.board;
@@ -429,14 +439,11 @@ public class MinMax {
         int ud2=Math.abs(figuresOther.get(0).x-boardState.pointBuild.x) + Math.abs(figuresOther.get(0).y-boardState.pointBuild.y);
         ud2+=Math.abs(figuresOther.get(1).x-boardState.pointBuild.x) + Math.abs(figuresOther.get(1).y-boardState.pointBuild.y);
 
-        if (boardState.winner==player)
+        if (boardState.winner!=-1)
         {
-            return (t*100);
+            return -1*t*(100);//-1 because it is detected on level below
         }
-        if (boardState.winner==1-player)
-        {
-            return t*(-100);
-        }
+
         int func = t*(m+n*(ud1-ud2));
 
         //Log.d("SANTORINI_LOG","----------------------------------------------");
@@ -450,8 +457,8 @@ public class MinMax {
         //Log.d("SANTORINI_LOG","POINT FROM=> f1: "+boardState.pointFrom.x+","+boardState.pointFrom.y);
         return func;
     }
-    public static int heuristicFunctionNinja(BoardState boardState,int player)
-    {
+    //Heuristicka funkcija za sledeci potez za tezinu 3
+    public static int heuristicFunctionNinja(BoardState boardState,int player) {
         if (boardState==null) return 0;
 
         Cell[][] board = boardState.board;
@@ -502,14 +509,11 @@ public class MinMax {
             default: x=4;
         }
 
-        if (boardState.winner==player)
+        if (boardState.winner!=-1)
         {
-            return (t*100);
+            return -1*t*(100);//-1 because it is detected on level below
         }
-        if (boardState.winner==1-player)
-        {
-            return t*(-100);
-        }
+
         return t*(y+x);
 
         //Log.d("SANTORINI_LOG","----------------------------------------------");

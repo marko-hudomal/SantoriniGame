@@ -142,6 +142,7 @@ public class GameActivity extends AppCompatActivity {
         }
     }
     //==============================================================================================
+    //Inicijalizacija table
     private void initalizeBoard(Game myGame)
     {
         for(int i=0;i<BOARD_WIDTH;i++)
@@ -157,6 +158,7 @@ public class GameActivity extends AppCompatActivity {
     }
 
     //Output----------------------------------------------------------------------------------------
+    //Inicijalizacija izlaznog fajla
     private PrintWriter initalizeOutputFile(){
 
         //Write external text file
@@ -179,6 +181,7 @@ public class GameActivity extends AppCompatActivity {
         return out;
     }
     //Input-----------------------------------------------------------------------------------------
+    //Inicijalizacija igre na osnovu ulaznog fajla
     private void readGameStateInputFile(String fileName)
     {
         BufferedReader in;
@@ -267,6 +270,7 @@ public class GameActivity extends AppCompatActivity {
 //    }
 
 
+    //Postavljanje trenutnog naslova igre (ko igra i koji potez)
     @SuppressLint("SetTextI18n")
     private void setTitle()
     {
@@ -279,6 +283,7 @@ public class GameActivity extends AppCompatActivity {
         textViewState.setText(STATES[myGame.player_state]);
         mAdapter.notifyDataSetChanged();
     }
+    //Postavljanje krajnjeg naslova igre (kada je igra gotova i kada je poznat pobednik)
     public void setTitleWon()
     {
         textViewPlayer.setTextSize((float)35.0);
@@ -287,10 +292,12 @@ public class GameActivity extends AppCompatActivity {
         recyclerView.startAnimation(AnimationUtils.loadAnimation(this, R.anim.game_end_anim));
         recyclerView.setAlpha((float)0.6);
     }
+    //Poziva azuriranje table iz Adaptera
     public void refreshBoard()
     {
         mAdapter.refreshBoard();
     }
+    //Kompletna Wrapper funkcija(Poziva druge wrapper funkcije setTitle i refreshBoard) azuriranja stanja tabele sa animacijama
     public void nextMoveRefresh()
     {
         textViewPlayer.startAnimation(AnimationUtils.loadAnimation(this, android.R.anim.slide_out_right));
@@ -300,7 +307,7 @@ public class GameActivity extends AppCompatActivity {
         //Log.d("SANTORINI_LOG","board refreshed!");
     }
 
-
+    //Moze da vrati heuristicku funkciju za odredjeni potez (kada se igra covek protiv coveka)
     @SuppressLint("SetTextI18n")
     public void onTipsClick(View view)
     {
@@ -336,6 +343,7 @@ public class GameActivity extends AppCompatActivity {
         setResult(RESULT_OK);
         finish();
     }
+    //Wrapper funkcija odigravanja sledeceg poteza
     public void onNextClick(View view)
     {
 

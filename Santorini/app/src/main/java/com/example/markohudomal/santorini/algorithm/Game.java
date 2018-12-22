@@ -37,6 +37,7 @@ public class Game {
     public Point p_move=null;
     public Point p_build=null;
 
+    //Konstruktor
     public Game(GameActivity myActivity,Cell[][] mCells, PrintWriter output)
     {
         this.output=output;
@@ -44,6 +45,7 @@ public class Game {
         this.myActivity=myActivity;
     }
 
+    //Logika odigravanja sledeceg poteza na koordinatama coordX,coordY
     public String playNextMove(int coordX,int coordY){
 
         String ret_message=null;
@@ -101,8 +103,9 @@ public class Game {
         nextState();
         return ret_message;
     }
-    public void nextState()
-    {
+
+    //Promena stanja igre(Inicijalizija, Pomeri, Gradi)
+    public void nextState() {
             if (nextMove)
             {
                 //Log.d("SANTORINI_LOG","nextState (nextMove=true)");
@@ -156,6 +159,8 @@ public class Game {
                 botPlayNextMove(GameActivity.difficulty);
             }
     }
+
+    //Inicijalizacija figura na tabli matrix, na kordinate click_x,click_y za igrača player
     public boolean setFigure(Cell [][] matrix, int click_x,int click_y,int player)
     {
         nextMove=false;
@@ -188,6 +193,8 @@ public class Game {
         }
         return true;
     }
+
+    //Pomeranje figure na tabli matrix, igrača player na kordinate click_x, click_y
     public boolean move(Cell [][] matrix,int click_x,int click_y,int player)
     {
         nextMove=false;
@@ -226,6 +233,8 @@ public class Game {
         }
         return false;
     }
+
+    //Gradnja na tabli matrix, igrača player na kordinatama click_x, click_y
     public boolean build(Cell [][] matrix,int click_x,int click_y,int player)
     {
         nextMove=false;
@@ -260,6 +269,8 @@ public class Game {
 
         return false;
     }
+
+    //Provera da li igrac player moze da pomeri neku od svojih figura
     public static boolean canMove(Cell[][] matrix,int player)
     {
         for(int i = 0; i<GameActivity.BOARD_WIDTH; i++)
@@ -292,6 +303,8 @@ public class Game {
         }
         return false;
     }
+
+    //Vraca -1 ako nema pobednika na tabli, 0 ako je pobendik prvi igrac i 1 ako je pobednik drugi igrac
     public static int winnerWho(Cell[][] board)
     {
         int ret=-1;
@@ -308,29 +321,37 @@ public class Game {
         return ret;
     }
 
+    //Upis koordinata u fajl(U obliku KarakterBroj [A1,B3...])
     public void printPosOutputFile(int i, int j)
     {
         output.append((char)((int)'A' + i)+""+(j+1)+" ");
         output.flush();
     }
+
+    //Upis koordinata u fajl(U obliku KarakterBroj [A1,B3...]) u jednoj liniji
     public void printLinePosOutputFile(int i,int j)
     {
         output.append((char)((int)'A' + i)+""+(j+1)+System.getProperty("line.separator"));
         output.flush();
     }
+
+    //Dekodovanje X koordinate (Iz oblika KarakterBroj [A1,B3...])
     public static int decodeX(String data)
     {
         char c = data.charAt(0);
         return ((int)c-(int)'A');
     }
+
+    //Dekodovanje Y koordinate (Iz oblika KarakterBroj [A1,B3...])
     public static int decodeY(String data)
     {
         int x = Integer.parseInt(data.charAt(1)+"");
         return x-1;
     }
 
-    //Bot
+    //Bot deo---------------------------------------------------------------------------------------
 
+    //Vraca random slobodnu celiju
     public Point randCell() {
         int x;
         int y;
@@ -342,6 +363,8 @@ public class Game {
 
         return new Point(x,y);
     }
+
+    //Logika odigravanja sledeceg poteza, bot sa tezinama 1,2 ili 3, bira odredjene algoritme za odabiranje iz MinMax klase
     public void botPlayNextMove(int difficulty)
     {
         int game_depth=GameActivity.game_depth;
